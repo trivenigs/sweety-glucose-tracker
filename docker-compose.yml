@@ -1,0 +1,83 @@
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: sweety
+      POSTGRES_PASSWORD: sweety_password
+      POSTGRES_DB: sweety
+    ports:
+      - "5433:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./database/database/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sweety -d sweety"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+  seed:
+    build: ./server
+    command: ["npm", "run", "seed"]
+    environment:
+      NODE_ENV: development
+      DATABASE_URL: postgres://sweety:sweety_password@db:5432/sweety
+      JWT_SECRET: ${JWT_SECRET:-local-development-secret-change-me}
+      CLIENT_ORIGIN: http://localhost:5173
+      REDIS_URL: redis://redis:6379
+    depends_on:
+      db:
+        condition: service_healthy
+  api:
+    build: ./server
+    environment:
+      PORT: 4000
+      NODE_ENV: development
+      DATABASE_URL: postgres://sweety:sweety_password@db:5432/sweety
+      JWT_SECRET: ${JWT_SECRET:-local-development-secret-change-me}
+      JWT_EXPIRES_IN: 1h
+      BCRYPT_ROUNDS: 10
+      CLIENT_ORIGIN: http://localhost:5173
+      REDIS_URL: redis://redis:6379
+      REMINDER_CRON: ${REMINDER_CRON:-0 9 * * *}
+    ports:
+      - "4000:4000"
+    depends_on:
+      seed:
+        condition: service_completed_successfully
+      redis:
+        condition: service_healthy
+  worker:
+    build: ./server
+    command: ["node", "src/workers/reminderWorker.js"]
+    environment:
+      NODE_ENV: development
+      DATABASE_URL: postgres://sweety:sweety_password@db:5432/sweety
+      JWT_SECRET: ${JWT_SECRET:-local-development-secret-change-me}
+      CLIENT_ORIGIN: http://localhost:5173
+      REDIS_URL: redis://redis:6379
+      REMINDER_CRON: ${REMINDER_CRON:-0 9 * * *}
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+  client:
+    build:
+      context: ./client
+      args:
+        VITE_API_URL: http://localhost:4000/api
+    ports:
+      - "5173:5173"
+    depends_on:
+      - api
+volumes:
+  pgdata:
