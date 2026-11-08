@@ -30,7 +30,7 @@ router.post('/patients', async (req, res, next) => {
     if (!rows[0]) {
       const existing = await db.query(`SELECT u.id,u.name,u.email FROM doctor_patients dp JOIN users u ON u.id=dp.patient_id WHERE dp.doctor_id=$1 AND u.email=$2`, [req.user.id, email]);
       if (existing.rows[0]) return res.json({ patient: existing.rows[0] });
-      return res.status(404).json({ error: 'No patient account found for that email.' });
+      return res.status(404).json({ error: 'We couldn’t find a patient account associated with that email. Please check the address or ask the patient to create an account before assigning them.' });
     }
     const patient = await db.query('SELECT id,name,email FROM users WHERE id=$1', [rows[0].patient_id]);
     res.status(201).json({ patient: patient.rows[0] });
