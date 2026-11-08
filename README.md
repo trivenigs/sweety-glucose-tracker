@@ -67,7 +67,6 @@ Screenshots of the login page, seeded patient dashboard, journal, and reading fo
 
 - Dates use the user's browser local calendar date and are stored as PostgreSQL `DATE`, avoiding timezone shifts. Future dates are rejected. A reading's date and time slot are unique per user.
 - Month-to-date ends on the selected date; the monthly report covers the entire previous calendar month. The grouped bar graph compares each time slot over the seven days ending on the selected date.
-- Doctor accounts are provisioned through the seed script or by an administrator; public signup always creates a patient account. Assignment only grants access to reports for explicitly assigned patient accounts.
 - Passwords use bcrypt; JWTs identify the user for every data query. More time would go toward report integration tests, accessibility polish, and a hosted deployment with managed secrets and automated database migrations.
 
 
