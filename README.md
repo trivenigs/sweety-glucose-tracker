@@ -59,6 +59,10 @@ All reading and report routes require `Authorization: Bearer <token>`. Report re
 
 `cd server && npm test` runs the API validation tests. `cd client && npm test` runs the React Testing Library reading form test. `TEST_DATABASE_URL` is available for future database integration tests.
 
+## Screenshots
+
+Screenshots of the login page, seeded patient dashboard, journal, and reading form are available in the [`screenshots`](screenshots) folder. This project includes screenshots only; no screen recording is included.
+
 ## Notes
 
 - Dates use the user's browser local calendar date and are stored as PostgreSQL `DATE`, avoiding timezone shifts. Future dates are rejected. A reading's date and time slot are unique per user.
@@ -66,6 +70,4 @@ All reading and report routes require `Authorization: Bearer <token>`. Report re
 - Doctor accounts are provisioned through the seed script or by an administrator; public signup always creates a patient account. Assignment only grants access to reports for explicitly assigned patient accounts.
 - Passwords use bcrypt; JWTs identify the user for every data query. More time would go toward report integration tests, accessibility polish, and a hosted deployment with managed secrets and automated database migrations.
 
-## Screenshots / recording
 
-Capture the login page and a seeded patient dashboard after starting the Docker stack. A 2–3 minute walkthrough can show login, adding/editing/deleting a reading, changing the journal date, viewing reports and chart, and signing in as the demo doctor. Screenshot and recording files are not included in this workspace yet.
